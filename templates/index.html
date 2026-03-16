@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Digital Footprint Risk Analyzer</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<h1>Digital Footprint Risk Analyzer</h1>
+
+<form method="POST">
+
+<input type="text" name="userdata" placeholder="Enter name, email, phone or username" required>
+
+<button type="submit">Analyze</button>
+
+</form>
+
+{% if exposure %}
+
+<h2>Results</h2>
+
+<p>Mentions Found: {{ exposure }}</p>
+
+<p>Risk Level: {{ risk }}</p>
+
+<p>Risk Score: {{ score }}%</p>
+
+<h3>Privacy Suggestions</h3>
+
+<ul>
+<li>Remove personal info from public profiles</li>
+<li>Enable social media privacy settings</li>
+<li>Avoid sharing phone numbers publicly</li>
+<li>Use strong passwords and 2FA</li>
+</ul>
+
+{% endif %}
+
+</body>
+</html>
