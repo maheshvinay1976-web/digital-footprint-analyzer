@@ -2,49 +2,48 @@
 <html>
 <head>
     <title>Digital Footprint Risk Analyzer</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-
     <div class="container">
-
         <h1>Digital Footprint Risk Analyzer</h1>
-
         <form method="POST">
-
-            <div class="input-group">
-                <label>Name</label>
-                <input type="text" name="name" placeholder="Enter your name">
-            </div>
-
-            <div class="input-group">
-                <label>Email</label>
-                <input type="email" name="email" placeholder="Enter your email">
-            </div>
-
-            <div class="input-group">
-                <label>Phone Number</label>
-                <input type="text" name="phone" placeholder="Enter your phone number">
-            </div>
-
-            <div class="input-group">
-                <label>Username</label>
-                <input type="text" name="username" placeholder="Enter your username">
-            </div>
-
+            <input type="text" name="name" placeholder="Full Name"><br>
+            <input type="email" name="email" placeholder="Email"><br>
+            <input type="text" name="phone" placeholder="Phone Number"><br>
+            <input type="text" name="username" placeholder="Username"><br>
             <button type="submit">Analyze</button>
-
         </form>
 
-        {% if result %}
-        <div class="result">
-            <h3>Analysis Result</h3>
-            <p>{{ result }}</p>
-        </div>
+        {% if score %}
+        <h2>Risk Score: {{ score }}% ({{ level }})</h2>
+        <h3>Reasons:</h3>
+        <ul>
+            {% for reason in reasons %}
+                <li>{{ reason }}</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Social Media Links:</h3>
+        <ul>
+            {% for platform, link in social_links.items() %}
+                <li><a href="{{ link }}" target="_blank">{{ platform }}</a></li>
+            {% endfor %}
+        </ul>
+
+        {% if breaches %}
+        <h3>Breaches Found:</h3>
+        <ul>
+            {% for breach in breaches %}
+                <li>{{ breach }}</li>
+            {% endfor %}
+        </ul>
         {% endif %}
 
+        {% if dark_web_risk %}
+        <h3>Dark Web Exposure Detected!</h3>
+        {% endif %}
+        {% endif %}
     </div>
-
 </body>
 </html>
