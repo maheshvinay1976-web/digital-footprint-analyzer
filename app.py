@@ -1,77 +1,123 @@
 from flask import Flask, render_template, request
 import requests
-from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
-def search_web(query):
+# =====================
+# Function to calculate basic risk
+# =====================
+def calculate_risk(name, email, phone, username):
+    score = 0
+    reasons = []
 
-    url = f"https://www.google.com/search?q={query}"
-    headers = {
-        "User-Agent": "Mozilla/5.0"
+    # Name check
+    if name:
+        score += 10
+        reasons.append("Name can reveal identity")
+
+    # Email check
+    if email:
+        score += 20
+        if any(char.isdigit() for char in email):
+            score += 10
+            reasons.append("Email may reveal birth year or personal info")
+
+    # Phone check
+    if phone:
+        score += 20
+        reasons.append("Phone number exposure risk")
+
+    # Username check
+    if username:
+        score += 20
+        if len(username) < 6:
+            score += 10
+            reasons.append("Short username easy to search")
+
+    return score, reasons
+
+# =====================
+# Function to generate social media links
+# =====================
+def generate_social_links(username):
+    platforms = {
+        "Instagram": f"https://www.instagram.com/{username}",
+        "Twitter": f"https://twitter.com/{username}",
+        "GitHub": f"https://github.com/{username}",
+        "LinkedIn": f"https://www.linkedin.com/in/{username}"
     }
+    return platforms
 
-    response = requests.get(url, headers=headers)
+# =====================
+# Function to check data breach (using Have I Been Pwned API)
+# =====================
+def check_email_breach(email):
+    url = f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}"
+    headers = {
+        "hibp-api-key": "YOUR_HIBP_API_KEY",  # Get free API key from Have I Been Pwned
+        "User-Agent": "DigitalFootprintAnalyzer"
+    }
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            breaches = [breach['Name'] for breach in response.json()]
+            return breaches
+        else:
+            return []
+    except:
+        return []
 
-    soup = BeautifulSoup(response.text, "html.parser")
+# =====================
+# Function to simulate Dark Web email check
+# =====================
+def dark_web_email_check(email):
+    # We will simulate this safely
+    dark_web_leak_emails = ["test@example.com", "sample@gmail.com"]
+    if email.lower() in dark_web_leak_emails:
+        return True
+    return False
 
-    results = []
-
-    for g in soup.find_all("h3"):
-        results.append(g.text)
-
-    return results
-
-
+# =====================
+# Routes
+# =====================
 @app.route("/", methods=["GET", "POST"])
 def index():
-
-    result = ""
-    found_sources = []
-    risk_score = 0
-
     if request.method == "POST":
+        name = request.form["name"]
+        email = request.form["email"]
+        phone = request.form["phone"]
+        username = request.form["username"]
 
-        name = request.form.get("name")
-        email = request.form.get("email")
-        phone = request.form.get("phone")
-        username = request.form.get("username")
+        # Basic risk score
+        score, reasons = calculate_risk(name, email, phone, username)
 
-        if name:
-            name_results = search_web(name)
-            if len(name_results) > 0:
-                risk_score += 20
-                found_sources.append("Name appears in public search results")
+        # Social media links
+        social_links = generate_social_links(username)
 
-        if email:
-            email_results = search_web(email)
-            if len(email_results) > 0:
-                risk_score += 40
-                found_sources.append("Email may appear in online sources")
+        # Check breaches
+        breaches = check_email_breach(email)
+        if breaches:
+            score += 20
+            reasons.append("Email found in data breaches")
 
-        if phone:
-            phone_results = search_web(phone)
-            if len(phone_results) > 0:
-                risk_score += 30
-                found_sources.append("Phone number may appear online")
+        # Dark web check
+        dark_web_risk = dark_web_email_check(email)
+        if dark_web_risk:
+            score += 20
+            reasons.append("Email exposed in dark web leaks")
 
-        if username:
-            username_results = search_web(username)
-            if len(username_results) > 0:
-                risk_score += 20
-                found_sources.append("Username may appear on websites or social media")
-
-        if risk_score <= 30:
+        # Risk level
+        if score < 30:
             level = "Low Risk"
-        elif risk_score <= 60:
+        elif score < 60:
             level = "Medium Risk"
         else:
             level = "High Risk"
 
-        result = f"Risk Score: {risk_score}% ({level})"
+        return render_template("index.html", score=score, level=level, reasons=reasons,
+                               social_links=social_links, breaches=breaches, dark_web_risk=dark_web_risk)
 
-    return render_template("index.html", result=result, sources=found_sources)
-
+    return render_template("index.html")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(debug=True)
