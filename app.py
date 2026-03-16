@@ -1,49 +1,53 @@
 from flask import Flask, render_template, request
-import requests
-from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
-def analyze_data(query):
-
-    url = "https://www.google.com/search?q=" + query
-    headers = {"User-Agent": "Mozilla/5.0"}
-
-    response = requests.get(url, headers=headers)
-
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    results = soup.find_all("h3")
-
-    exposure_count = len(results)
-
-    risk_score = min(exposure_count * 10, 100)
-
-    if risk_score > 70:
-        risk = "High Risk"
-    elif risk_score > 40:
-        risk = "Medium Risk"
-    else:
-        risk = "Low Risk"
-
-    return exposure_count, risk, risk_score
-
-
-@app.route("/", methods=["GET","POST"])
+@app.route("/", methods=["GET", "POST"])
 def index():
 
-    exposure = None
-    risk = None
-    score = None
+    result = ""
+    risk_score = 0
+    messages = []
 
     if request.method == "POST":
 
-        user_input = request.form["userdata"]
+        name = request.form.get("name")
+        email = request.form.get("email")
+        phone = request.form.get("phone")
+        username = request.form.get("username")
 
-        exposure, risk, score = analyze_data(user_input)
+        if name:
+            risk_score += 10
+            messages.append("Your name may appear in public records.")
 
-    return render_template("index.html", exposure=exposure, risk=risk, score=score)
+        if email:
+            risk_score += 40
+            messages.append("Email addresses are commonly exposed in data breaches.")
+
+        if phone:
+            risk_score += 30
+            messages.append("Phone numbers can be used for spam or phishing attacks.")
+
+        if username:
+            risk_score += 20
+            messages.append("Usernames can reveal social media accounts.")
+
+        risk_level = ""
+
+        if risk_score <= 20:
+            risk_level = "Low Risk"
+        elif risk_score <= 50:
+            risk_level = "Medium Risk"
+        else:
+            risk_level = "High Risk"
+
+        result = f"Risk Score: {risk_score}% ({risk_level})"
+
+        if messages:
+            result += " | " + " ".join(messages)
+
+    return render_template("index.html", result=result)
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=5000)
