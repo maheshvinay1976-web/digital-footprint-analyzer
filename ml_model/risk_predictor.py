@@ -1,8 +1,9 @@
-def predict_risk(breach_found, breach_count):
+def predict_risk(username_hits, social_accounts):
+
     score = 10
 
-    if breach_found:
-        score += breach_count * 20
+    score += len(username_hits) * 10
+    score += len(social_accounts) * 15
 
     if score > 100:
         score = 100
