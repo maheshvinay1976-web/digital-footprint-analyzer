@@ -1,21 +1,21 @@
 import requests
+from bs4 import BeautifulSoup
 
-def check_breach(email):
-    url = f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}"
-    
+def search_username(username):
+
+    query = f"https://www.google.com/search?q={username}"
+
     headers = {
-        "User-Agent": "DigitalFootprintAnalyzer"
+        "User-Agent": "Mozilla/5.0"
     }
 
-    response = requests.get(url, headers=headers)
+    response = requests.get(query, headers=headers)
 
-    if response.status_code == 200:
-        breaches = response.json()
-        sites = [b['Name'] for b in breaches]
-        return True, sites
+    soup = BeautifulSoup(response.text, "html.parser")
 
-    elif response.status_code == 404:
-        return False, []
+    results = []
 
-    else:
-        return None, []
+    for g in soup.select("h3"):
+        results.append(g.text)
+
+    return results[:5]
