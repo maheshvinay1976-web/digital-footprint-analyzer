@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from scraper.search_api import search_username
-from utils.social_finder import check_social
+from utils.helpers import check_social
 from ml_model.risk_predictor import predict_risk
 
 app = Flask(__name__)
