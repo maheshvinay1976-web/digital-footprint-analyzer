@@ -1,15 +1,10 @@
-# Placeholder AI / risk scoring
+def predict_risk(breach_found, breach_count):
+    score = 10
 
-def predict_risk(name, email, phone, username):
-    """
-    Simple risk scoring logic for demonstration.
-    You can replace with ML model later.
-    """
-    score = 50  # base score
-    if email.endswith("@gmail.com"):
-        score += 10
-    if phone.startswith("9"):
-        score += 5
-    if len(username) < 5:
-        score += 5
-    return min(score, 100)
+    if breach_found:
+        score += breach_count * 20
+
+    if score > 100:
+        score = 100
+
+    return score
