@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Digital Footprint Risk Analyzer</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Digital Footprint Risk Analyzer</h1>
+    <form method="POST">
+        <input type="text" name="name" placeholder="Full Name" required><br>
+        <input type="email" name="email" placeholder="Email" required><br>
+        <input type="text" name="phone" placeholder="Phone Number"><br>
+        <input type="text" name="username" placeholder="Username"><br>
+        <button type="submit">Analyze</button>
+    </form>
+
+    {% if results %}
+        <h2>Risk Score: {{ results['risk_score'] }}%</h2>
+        <h3>Exposures:</h3>
+        <ul>
+            {% for item in results['exposures'] %}
+                <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+        <h3>Suggestions:</h3>
+        <ul>
+            {% for suggestion in results['suggestions'] %}
+                <li>{{ suggestion }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+    <script src="/static/script.js"></script>
+</body>
+</html>
