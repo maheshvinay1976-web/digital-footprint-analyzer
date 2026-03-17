@@ -1,41 +1,46 @@
 from flask import Flask, render_template, request
-from scraper.search_api import search_username
-from utils.helpers import check_social
-from ml_model.risk_predictor import predict_risk
+from utils.helpers import check_social, calculate_risk, get_risk_level
 
 app = Flask(__name__)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-
     results = None
 
     if request.method == "POST":
+        # Get user input
+        name = request.form.get("name")
+        email = request.form.get("email")
+        phone = request.form.get("phone")
+        username = request.form.get("username")
 
-        name = request.form['name']
-        email = request.form['email']
-        phone = request.form['phone']
-        username = request.form['username']
+        # 🔍 Check social media accounts
+        social_accounts = []
+        if username:
+            social_accounts = check_social(username)
 
-        username_hits = search_username(username)
+        # 📊 Calculate risk score
+        risk_score = calculate_risk(email, phone, len(social_accounts))
 
-        social_accounts = check_social(username)
+        # 🚦 Get risk level
+        risk_level = get_risk_level(risk_score)
 
-        risk_score = predict_risk(username_hits, social_accounts)
-
+        # 📦 Prepare results
         results = {
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "username": username,
+            "social_accounts": social_accounts,
             "risk_score": risk_score,
-            "exposures": username_hits,
-            "social": social_accounts,
-            "suggestions": [
-                "Enable 2FA",
-                "Avoid public personal data",
-                "Use different passwords"
-            ]
+            "risk_level": risk_level
         }
 
     return render_template("index.html", results=results)
 
 
+import os
+
 if __name__ == "__main__":
-    app.run()
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
