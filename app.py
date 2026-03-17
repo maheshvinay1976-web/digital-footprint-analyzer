@@ -14,27 +14,39 @@ def index():
         phone = request.form.get("phone")
         username = request.form.get("username")
 
-        # 🔍 Check social media accounts
-        social_accounts = []
-        if username:
-            social_accounts = check_social(username)
+        # 🔍 Social accounts
+social_accounts = check_social(username)
 
-        # 📊 Calculate risk score
-        risk_score = calculate_risk(email, phone, len(social_accounts))
+# 📊 Risk score
+risk_score = calculate_risk(email, phone, len(social_accounts))
+risk_level = get_risk_level(risk_score)
 
-        # 🚦 Get risk level
-        risk_level = get_risk_level(risk_score)
+# 🧠 Risk breakdown
+breakdown = {
+    "email_risk": 15 if email else 0,
+    "phone_risk": 15 if phone else 0,
+    "social_risk": len(social_accounts) * 15
+}
 
-        # 📦 Prepare results
-        results = {
-            "name": name,
-            "email": email,
-            "phone": phone,
-            "username": username,
-            "social_accounts": social_accounts,
-            "risk_score": risk_score,
-            "risk_level": risk_level
-        }
+# 🎨 Color for UI
+if risk_score < 30:
+    color = "green"
+elif risk_score < 70:
+    color = "orange"
+else:
+    color = "red"
+
+results = {
+    "name": name,
+    "email": email,
+    "phone": phone,
+    "username": username,
+    "social_accounts": social_accounts,
+    "risk_score": risk_score,
+    "risk_level": risk_level,
+    "breakdown": breakdown,
+    "color": color
+}
 
     return render_template("index.html", results=results)
 
