@@ -1,6 +1,5 @@
 import requests
 
-# 🔍 Check social media profiles (REAL check)
 def check_social(username):
     sites = {
         "GitHub": f"https://github.com/{username}",
@@ -15,8 +14,8 @@ def check_social(username):
         try:
             response = requests.get(url, timeout=5)
 
-            # Check if profile exists
             if response.status_code == 200 and "Not Found" not in response.text:
+                # ✅ RETURN DICTIONARY (IMPORTANT)
                 found.append({
                     "platform": name,
                     "url": url
@@ -26,7 +25,6 @@ def check_social(username):
             pass
 
     return found
-
 
 # 📊 Calculate risk score (REAL logic)
 def calculate_risk(email, phone, social_count):
