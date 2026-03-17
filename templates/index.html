@@ -16,20 +16,44 @@
     </form>
 
     {% if results %}
-        <h2>Risk Score: {{ results['risk_score'] }}%</h2>
-        <h3>Exposures:</h3>
-        <ul>
-            {% for item in results['exposures'] %}
-                <li>{{ item }}</li>
-            {% endfor %}
-        </ul>
-        <h3>Suggestions:</h3>
-        <ul>
-            {% for suggestion in results['suggestions'] %}
-                <li>{{ suggestion }}</li>
-            {% endfor %}
-        </ul>
+
+<h2>Analysis Result</h2>
+
+<h3 style="color: {{ results.color }}">
+    Risk Score: {{ results.risk_score }}% ({{ results.risk_level }})
+</h3>
+
+<h4>🔍 Social Profiles Found:</h4>
+<ul>
+    {% for acc in results.social_accounts %}
+        <li>
+            <a href="{{ acc.url }}" target="_blank">
+                {{ acc.platform }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>
+
+<h4>📊 Risk Breakdown:</h4>
+<ul>
+    <li>Email Risk: {{ results.breakdown.email_risk }}</li>
+    <li>Phone Risk: {{ results.breakdown.phone_risk }}</li>
+    <li>Social Exposure Risk: {{ results.breakdown.social_risk }}</li>
+</ul>
+
+<h4>💡 Suggestions:</h4>
+<ul>
+    {% if results.risk_score > 70 %}
+        <li>Remove personal info from public profiles</li>
+        <li>Enable 2FA on all accounts</li>
+    {% elif results.risk_score > 30 %}
+        <li>Review privacy settings</li>
+    {% else %}
+        <li>Your digital footprint is low 👍</li>
     {% endif %}
+</ul>
+
+{% endif %}
     
     <script src="/static/script.js"></script>
 </body>
